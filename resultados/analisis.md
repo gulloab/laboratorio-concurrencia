@@ -39,3 +39,33 @@ Como estos pasos pueden ser interrumpidos por otros hilos, la operación no es a
 
 **4. ¿Qué problema de concurrencia se está observando?**
 Se está observando una **condición de carrera** (race condition), la cual ocurre cuando dos o más hilos acceden a un recurso compartido al mismo tiempo y al menos uno intenta modificarlo, generando resultados impredecibles.
+
+## Parte 3: Corrección usando mutex
+
+### Resultados de Ejecución
+Al ejecutar el programa 5 veces protegiendo la sección crítica con `std::mutex`, se obtuvieron los siguientes resultados:
+
+| Ejecución | Valor esperado | Valor obtenido |
+| :---: | :---: | :---: |
+| 1 | 400000 | 400000 |
+| 2 | 400000 | 400000 |
+| 3 | 400000 | 400000 |
+| 4 | 400000 | 400000 |
+| 5 | 400000 | 400000 |
+
+### Preguntas de Análisis
+
+1. **¿Qué cambió con respecto al programa anterior?**  
+   Se agregó un objeto global `std::mutex` y se envolvió la instrucción `contador++` en un bloqueo utilizando `std::lock_guard`. Esto garantiza exclusión mutua, permitiendo que únicamente un hilo modifique el contador a la vez.
+
+2. **¿Qué hace `std::mutex`?**  
+   Es un mecanismo de sincronización (Mutual Exclusion) que actúa como un cerrojo. Permite que solo un hilo adquiera la propiedad del recurso a la vez; si otro hilo intenta adquirir el mutex mientras está bloqueado, este se suspende hasta que quede libre.
+
+3. **¿Qué hace `std::lock_guard`?**  
+   Es una envoltura RAII para administrar mutexes. Adquiere el bloqueo del mutex al construirse y lo libera automáticamente en su destructor cuando la variable sale fuera del alcance (scope), evitando bloqueos olvidados o fugas de recursos.
+
+4. **¿Por qué ahora el resultado sí debería ser correcto?**  
+   Porque la sección crítica (`contador++`) ahora se ejecuta de forma atómica con respecto a otros hilos. Ningún hilo puede interrumpir la secuencia de lectura-modificación-escritura de otro hilo sobre la variable `contador`.
+
+5. **¿Qué desventaja podría tener proteger cada incremento individual con un mutex?**  
+   Introduce una penalización sustancial en el rendimiento debido al overhead (costo extra) constante de adquirir y liberar el cerrojo en cada iteración del bucle, provocando mucha contención de hilos y disminuyendo la ganancia de paralelismo.
