@@ -26,13 +26,9 @@ int main() {
         hilo.join();
     }
 
-    std::cout << "Valor esperado: " 
-              << cantidad_hilos * repeticiones 
-              << std::endl;
+    std::cout << "Valor esperado: " << cantidad_hilos * repeticiones << std::endl;
               
-    std::cout << "Valor obtenido: " 
-              << contador 
-              << std::endl;
+    std::cout << "Valor obtenido: " << contador << std::endl;
               
     return 0;
 }
